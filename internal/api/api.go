@@ -5,68 +5,50 @@ import (
 	"io"
 	"net/http"
 	"github.com/RamezEssam/pokedexcli/internal/pokecache"
+	"github.com/RamezEssam/pokedexcli/internal/entity"
 )
 
 const (
 	LOCATIONS_ENPOINT = "https://pokeapi.co/api/v2/location/"
 )
 
-type LocationResponse struct {
-    Count    int         `json:"count"`
-    Next     string      `json:"next"`
-    Previous interface{} `json:"previous"`
-    Results  []Location  `json:"results"`
-}
 
-type Location struct {
-    Name string `json:"name"`
-    URL  string `json:"url"`
-}
-
-func callLocationsAPI(url string) ([]Location, error) {
+func callLocationsAPI(url string) ([]entity.Location, error) {
 	res, err := http.Get(url)
 	if err != nil {
-		return []Location{}, err
+		return []entity.Location{}, err
 	}
 	defer res.Body.Close()
-	var response LocationResponse
+	var response entity.LocationResponse
 	jsonResp, err := io.ReadAll(res.Body)
 	if err != nil {
-		return []Location{}, err
+		return []entity.Location{}, err
 	}
 	jsonErr := json.Unmarshal(jsonResp, &response)
 	if jsonErr != nil {
-		return []Location{}, jsonErr
+		return []entity.Location{}, jsonErr
 	}
 
 	return response.Results, nil
 }
 
 
-func GetLocations(offset string, c pokecache.Cache) ([]Location, error) {
+func GetLocations(offset string, c pokecache.Cache) ([]entity.Location, error) {
 
 	url := LOCATIONS_ENPOINT + "?offset=" + offset
 
 	if c.IsEmpty() {
 		locations, err := callLocationsAPI(url)
+		c.Add(url, locations)
 		return locations, err
 	}else {
 		val, ok := c.Get(url)
 
 		if ok {
-			var response LocationResponse
-			jsonResp, err := io.ReadAll(val.Body)
-			if err != nil {
-				return []Location{}, err
-			}
-			jsonErr := json.Unmarshal(jsonResp, &response)
-			if jsonErr != nil {
-				return []Location{}, jsonErr
-			}
-
-			return response.Results, nil
+			return val, nil
 		}else {
 			locations, err := callLocationsAPI(url)
+			c.Add(url, locations)
 			return locations, err
 		}
 	}

@@ -1,10 +1,11 @@
 package pokecache
 
 import (
-	"net/http"
 	"sync"
 	"time"
+	"github.com/RamezEssam/pokedexcli/internal/entity"
 )
+
 
 type Cache struct{
 	cache map[string]cacheEntry
@@ -13,7 +14,7 @@ type Cache struct{
 
 type cacheEntry struct {
 	createdAt time.Time
-	val http.Response
+	val []entity.Location
 }
 
 
@@ -31,7 +32,7 @@ func (c Cache) IsEmpty() bool {
 	return len(c.cache) == 0
 }
 
-func (c Cache) Add(key string, val http.Response) {
+func (c Cache) Add(key string, val []entity.Location) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	_, ok := c.cache[key]
@@ -45,14 +46,14 @@ func (c Cache) Add(key string, val http.Response) {
 }
 
 
-func (c Cache) Get(key string) (http.Response, bool) {
+func (c Cache) Get(key string) ([]entity.Location, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	val, ok := c.cache[key]
 	if ok {
 		return val.val, true
 	}else {
-		return http.Response{}, false
+		return []entity.Location{}, false
 	}
 }
 
