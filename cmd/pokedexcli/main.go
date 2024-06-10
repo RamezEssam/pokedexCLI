@@ -23,7 +23,9 @@ func main() {
 			break
 		}
 		input := strings.ToLower(scanner.Text())
-		switch input {
+		input_fields := strings.Fields(input)
+		cmd := input_fields[0]
+		switch cmd {
 		case "help":
 			helpCmd := commands.HelpCommand {
 				Name: "help",
@@ -71,9 +73,28 @@ func main() {
 			if err != nil {
 				fmt.Println(err)
 			}
+		case "explore":
+			if len(input_fields) < 2 {
+				fmt.Println("missing location area")
+				continue
+			}
+
+			location_area := input_fields[1]
+
+			expCmd := commands.ExploreCommand {
+				Name: "explore",
+				Description: "Displays list of pokemons foudn at given location",
+				Callback: commands.CommandExplore,
+			}
+
+			err := expCmd.Callback(location_area)
+			if err != nil {
+				fmt.Println(err)
+			}
 			
 		default:
 			fmt.Printf("Unknown Command: %v\n", input)
+
 		}
 	}
 	
