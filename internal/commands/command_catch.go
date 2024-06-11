@@ -14,6 +14,26 @@ type CatchCommand struct {
 }
 
 
+func playCatch(attempted_pokemon entity.Pokemon, caught map[string]entity.Pokemon) {
+
+		rand_int := rand.Intn(attempted_pokemon.BaseExperience)
+
+		probability_caught := 1.0 / float64(rand_int)
+
+		rand_float := rand.Float64()
+
+		pokemon_caught :=  rand_float < probability_caught
+
+		if pokemon_caught {
+			fmt.Printf("Throwing a Pokeball at %s...\n", attempted_pokemon.Name)
+			fmt.Printf("%s was caught!\n", attempted_pokemon.Name)
+			caught[attempted_pokemon.Name] = attempted_pokemon
+		}else {
+			fmt.Printf("Throwing a Pokeball at %s...\n", attempted_pokemon.Name)
+			fmt.Printf("%s escaped!\n", attempted_pokemon.Name)
+		}
+}
+
 func CommandCatch(name string, caught map[string]entity.Pokemon, attempted map[string]entity.Pokemon) error {
 
 	attempted_pokemon, ok := attempted[name]
@@ -24,26 +44,8 @@ func CommandCatch(name string, caught map[string]entity.Pokemon, attempted map[s
 			fmt.Printf("%s already captured!\n", name)
 			return nil
 		}
-		base_exp := attempted_pokemon.BaseExperience
-
-		rand_int := rand.Intn(base_exp)
-
-		probability_caught := 1.0 / float64(rand_int)
-
-		rand_float := rand.Float64()
-
-		pokemon_caught :=  rand_float < probability_caught
-
-		if pokemon_caught {
-			fmt.Printf("Throwing a Pokeball at %s...\n", name)
-			fmt.Printf("%s was caught!\n", name)
-			caught[name] = attempted_pokemon
-			return nil
-		}else {
-			fmt.Printf("Throwing a Pokeball at %s...\n", name)
-			fmt.Printf("%s escaped!\n", name)
-			return nil
-		}
+		playCatch(attempted_pokemon, caught)
+		return nil
 	}else{
 		caught_pokemon, err := api.GetPokemonStats(name)
 
@@ -53,26 +55,8 @@ func CommandCatch(name string, caught map[string]entity.Pokemon, attempted map[s
 			return err
 		}
 
-		base_exp := caught_pokemon.BaseExperience
-
-		rand_int := rand.Intn(base_exp)
-
-		probability_caught := 1.0 / float64(rand_int)
-
-		rand_float := rand.Float64()
-
-		pokemon_caught :=  rand_float < probability_caught
-
-		if pokemon_caught {
-			fmt.Printf("Throwing a Pokeball at %s...\n", name)
-			fmt.Printf("%s was caught!\n", name)
-			caught[name] = caught_pokemon
-			return nil
-		}else {
-			fmt.Printf("Throwing a Pokeball at %s...\n", name)
-			fmt.Printf("%s escaped!\n", name)
-			return nil
-		}
+		playCatch(caught_pokemon, caught)
+		return nil
 
 	}
 }
