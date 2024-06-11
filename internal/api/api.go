@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-
 	"github.com/RamezEssam/pokedexcli/internal/entity"
 	"github.com/RamezEssam/pokedexcli/internal/pokecache"
 )
@@ -13,6 +12,7 @@ import (
 const (
 	LOCATIONS_ENDPOINT = "https://pokeapi.co/api/v2/location/"
 	LOCATIONS_AREA_ENDPOINT = "https://pokeapi.co/api/v2/location-area/"
+	POKEMON_PROFILE_ENDPOINT = "https://pokeapi.co/api/v2/pokemon/"
 )
 
 
@@ -90,4 +90,39 @@ func GetPokemons(location_area string) ([]entity.PokemonEncounter, error) {
 	}
 
 	return pokemons, nil
+}
+
+
+func callPokemonAPI(url string) (entity.Pokemon, error) {
+	res, err := http.Get(url)
+	if err != nil {
+		return entity.Pokemon{}, err
+	}
+	defer res.Body.Close()
+	var response entity.Pokemon
+	if res.StatusCode != 200 {
+		return entity.Pokemon{}, errors.New("pokemon not found")
+	}
+	jsonResp, err := io.ReadAll(res.Body)
+	if err != nil {
+		return entity.Pokemon{}, err
+	}
+	jsonErr := json.Unmarshal(jsonResp, &response)
+	if jsonErr != nil {
+		return entity.Pokemon{}, jsonErr
+	}
+	return response, nil
+}
+
+
+func GetPokemonStats(name string) (entity.Pokemon, error) {
+	url := POKEMON_PROFILE_ENDPOINT + name
+
+	res, err := callPokemonAPI(url)
+
+	if err != nil {
+		return entity.Pokemon{}, err
+	}
+
+	return res, nil
 }

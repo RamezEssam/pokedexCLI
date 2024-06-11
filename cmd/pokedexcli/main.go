@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 	"github.com/RamezEssam/pokedexcli/internal/commands"
+	"github.com/RamezEssam/pokedexcli/internal/entity"
 	"github.com/RamezEssam/pokedexcli/internal/pokecache"
 )
 
@@ -17,6 +18,8 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	offset := 0
 	urlCache := pokecache.NewCache(10 * time.Second)
+	caught := make(map[string]entity.Pokemon)
+	attempted := make(map[string]entity.Pokemon)
 	for {
 		fmt.Print(START_SCRIPT)
 		if !scanner.Scan() {
@@ -91,7 +94,52 @@ func main() {
 			if err != nil {
 				fmt.Println(err)
 			}
-			
+		case "catch":
+			if len(input_fields) < 2 {
+				fmt.Println("missing pokemon name")
+				continue
+			}
+
+			pokemon_name := input_fields[1]
+
+			catchCmd := commands.CatchCommand {
+				Name: "catch",
+				Description: "Attempts to catch the given pokemon",
+				Callback: commands.CommandCatch,
+			}
+
+			err := catchCmd.Callback(pokemon_name, caught, attempted)
+			if err != nil {
+				fmt.Println(err)
+			}
+		case "inspect":
+			if len(input_fields) < 2 {
+				fmt.Println("missing pokemon name")
+				continue
+			}
+			pokemon_name := input_fields[1]
+
+			inspctCmd := commands.InspectCommand {
+				Name: "inspect",
+				Description: "Displays stats for given pokemon",
+				Callback: commands.CommadInspect,
+			}
+
+			err := inspctCmd.Callback(pokemon_name, caught)
+			if err != nil {
+				fmt.Println(err)
+			}
+		case "pokedex":
+			poedexCmd := commands.PokedexCommand {
+				Name: "pokedex",
+				Description: "Displays your caught pokemons",
+				Callback: commands.CommandPokedex,
+			}
+
+			err := poedexCmd.Callback(caught)
+			if err != nil {
+				fmt.Println(err)
+			}
 		default:
 			fmt.Printf("Unknown Command: %v\n", input)
 
