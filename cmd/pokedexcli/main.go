@@ -51,8 +51,8 @@ func main() {
 			}
 		case "map":
 			mapfCmd := commands.MapCommand {
-				Name: "Exit",
-				Description: "Exits the Pokedex REPL",
+				Name: "map",
+				Description: "Displays the next 20 locations",
 				Callback: commands.CommandMap,
 			}
 			err := mapfCmd.Callback(fmt.Sprint(offset), urlCache)
@@ -68,8 +68,8 @@ func main() {
 				continue
 			}
 			mapbCmd := commands.MapCommand {
-				Name: "Exit",
-				Description: "Exits the Pokedex REPL",
+				Name: "mapb",
+				Description: "Displays the previous 20 locations",
 				Callback: commands.CommandMap,
 			}
 			err := mapbCmd.Callback(fmt.Sprint(offset), urlCache)
